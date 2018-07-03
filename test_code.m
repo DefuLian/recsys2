@@ -13,6 +13,7 @@ norm(c2-c3)
 %%
 addpath(genpath('~/code/recsys/'))
 load ~/data/ml100kdata.mat
+load('../dataset/yelpdata.mat')
 [m,n] = size(Traindata);
 B = randn(m,64);
 D = randn(n,64);
@@ -28,7 +29,7 @@ eval2 = evaluate_item(train, test~=0, B, D, 100, 100);
 
 data = Traindata + Testdata;
 rec_hash = @(mat) dmf(mat, 'K', 64, 'max_iter',10, 'rho',0.01, 'alpha', 0.01, 'beta',0.01);
-rec_real = @(mat) dmf(mat, 'K', 64, 'max_iter',10, 'rho',0.01, 'alpha', 0.01, 'beta',0.01);
-eval1 = recommender(rec_hash, rec_real, data, 'test_ratio', 0.2);
-
-eval2 = rating_recommend(rec_hash, data, 'test_ratio', 0.2);
+rec_real = @(mat, varargin) gmf(mat, 'K', 64, 'max_iter',10, 'rho',0.01, 'eta', 0.01, varargin{:});
+eval1 = recommender(rec_hash, rec_real, data, 'test_ratio', 0.2, 'topk', 500);
+eval2 = rating_recommend(rec_real, data, 'test_ratio', 0.2);
+eval3 = rating_recommend(rec_hash, data, 'test_ratio', 0.2);

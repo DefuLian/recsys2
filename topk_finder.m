@@ -25,10 +25,12 @@ function topkmat = topk_finder_(train, U, V, topk)
     topkmat = cell2mat(topk_cell);
 end
 function out = multiply(a, b)
+D = size(a,2) * 32;
 if isa(a, 'uint32') && isa(b, 'uint32')
-    D = size(a,2) * 32;
-    out = D-2*hamming_dist(a, b);
+    %out = D-2*hamming_dist(a, b);
+    out = 0.5 - hamming_dist(a, b)/D;
 else
-    out = mult_real(a, b);    
+    %out = mult_real(a, b);
+    out = mult_real(a, b)/(2*D);
 end
 end

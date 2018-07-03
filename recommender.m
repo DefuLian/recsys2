@@ -17,13 +17,13 @@ function [eval_summary, eval_detail, elapsed] = heldout_rec(rec_hash, rec_real, 
         [~, tests{t}] = split_matrix(mat, split_mode, 1-test_ratio);
     end
 
-    for t=1:times
+    parfor t=1:times
         test = tests{t}; train = sparse(mat - test);
         fprintf('%d,%d\n',full(sum(train(:))),full(sum(test(:))));
         tic; [B, D] = rec_hash(train);
-        %[P, Q] = rec_real(train, 'P0',B, 'Q0',D, 'usage', 'concate'); t1 = toc;
+        %[P, Q] = rec_real(train, 'B0', B,  'D0', D); t1 = toc;
         [P, Q] = rec_real(train); t1 = toc;
-        tic;  metric_times{t} = compute_score(); t2 = toc;
+        tic;  metric_times{t} = compute_score(train, test, B, D, P, Q, topk, cutoff, isbinary); t2 = toc;
         elapsed(t, :) = [t1,t2];
     end
 
@@ -51,16 +51,17 @@ function [eval_summary, eval_detail, elapsed] = heldout_rec(rec_hash, rec_real, 
     end
     elapsed = mean(elapsed, 1);
 
-function eval = compute_score()
+
+end
+function eval = compute_score(train, test, B, D, P, Q, topk, cutoff, isbinary)
     test(train~=0) = 0;
     cand_count = full(size(train,2) - sum(train~=0,2)); 
     tuples = topk_finder(train, B, D, topk, isbinary); %return topk items for evalaution of next stage%
-    [mat_rank, user_count, ~] = predict_tuple(tuples, test, P, Q, cutoff);
+    mat_rank = predict_tuple(tuples, test, P, Q, cutoff);
     if ~isexplit(test)
-        eval = compute_item_metric(mat_rank, user_count, cand_count, topk, cutoff);
+        eval = compute_item_metric(test, mat_rank, cand_count, cutoff);
     else
-        eval = compute_rating_metric(test, mat_rank, cand_count, topk, cutoff);
+        eval = compute_rating_metric(test, mat_rank, cand_count, cutoff);
     end
-end
 end
 

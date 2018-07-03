@@ -1,5 +1,68 @@
-This is a recommendation project which consists of several (currently two) consecutive recommendation stages.
 
-The first stage is usuall very efficient model to retrival highly likely items, but not very care the internal ranking.
+# Two-Stage Recommender System
 
-The last stage can be of high computational cost, such as VAE and other deep learning models. 
+This is a two-stage recommendation project which consists of the first discrete methods and the second real methods
+
+* The first stage model is usuall a very efficient model to retrival highly preferred items, but does not care the internal ranking.
+* The last stage can be of high computational cost, such as VAE and other deep learning models, but here we only consider matrix factorization with unknow prior. 
+
+## Getting Started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+### Prerequisites
+
+What things you need to install the software and how to install them
+
+```
+Give examples
+```
+
+### Installing
+
+A step by step series of examples that tell you how to get a development env running
+
+Say what the step will be
+
+```
+Give the example
+```
+
+And repeat
+
+```
+until finished
+```
+
+End with an example of getting some data out of the system or using it for a little demo
+
+## Running the tests
+
+Explain how to run the automated tests for this system
+
+### Break down into end to end tests
+
+Explain what these tests test and why
+
+```
+Give an example
+```
+
+### And coding style tests
+
+Explain what these tests test and why
+
+```
+Give an example
+```
+
+
+## Authors
+
+* **Defu Lian** - 
+
+## Acknowledgments
+
+* Hat tip to anyone whose code was used
+* Inspiration
+* etc
