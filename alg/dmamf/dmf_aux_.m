@@ -1,6 +1,6 @@
 function [B,D] = dmf_aux_(R, varargin)
     [m,n] = size(R);
-    [k, max_iter, rho, Y, P, Q] = process_options(varargin, 'K', 64, 'max_iter', 20, 'rho', 0.1, 'Y', zeros(m,0), 'P', [], 'Q', []);
+    [k, max_iter, rho, Y, P, Q, update] = process_options(varargin, 'K', 64, 'max_iter', 20, 'rho', 0.1, 'Y', zeros(m,0), 'P', [], 'Q', [], 'update', true);
     if isempty(P) || isempty(Q)
         [P,Q] = dmf(R, 'init', true, 'max_iter', 20, 'rho', rho, 'alpha', 0, 'beta', 0, 'K', k);
     end
@@ -21,7 +21,7 @@ function [B,D] = dmf_aux_(R, varargin)
     for iter=1:max_iter
         U = coef * P;
         Q = optimize_(R, Q, D, zeros(k,n), U, rho, 0, true);
-        if ~isempty(Y)
+        if ~isempty(Y) && update
             W = proj_stiefel_manifold(Yt*[Q,D]);
             W = W(:,(k+1):(2*k));
             D = proj_hamming_balance(Y*W);
@@ -50,7 +50,7 @@ function [B,D] = dmf_aux_(R, varargin)
             val = val + sum((r - r_).^2) - rho * sum(r_.^2);
         end
         l1 = val + rho * sum(sum((P'*P) .* (T'*T)));
-        if isempty(Y)
+        if isempty(Y) || ~update
             l2 = 0;
         else
             l2 = sum(sum(Y.^2)) - 2 * sum(sum((D' * Y) .* W')) + sum(sum((W' * W) .* (D' * D)));

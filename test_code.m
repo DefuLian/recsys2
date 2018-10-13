@@ -71,10 +71,30 @@ eval6 = rating_recommend(@dmf_aux_, data, 'test_ratio', 0.2, 'K', 64, 'max_iter'
 eval7 = rating_recommend(@dmf_aux_, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho);
 eval8 = rating_recommend(@dmf_aux_c, data, 'test_ratio', 0.2, 'K', 64, 'rho', para.rho, 'Y', item_feat);
 eval9 = rating_recommend(@dmf_aux_c, data, 'test_ratio', 0.2, 'K', 64, 'rho', para.rho);
+para.rho= 0.1;
+metric_fun = @(metric) metric.item_recall_like(1,end);
+alg1 = @(varargin) rating_recommend(@(mat) ctr(mat, 'K', 64, 'max_iter', 20, 'rho', para.rho, 'Y', item_feat, varargin{:}), data, 'test_ratio', 0.2);
+[outputs{1:4}] = hyperp_search(alg1, metric_fun, 'beta', [0.01, 0.1, 1, 10, 50, 100], 'rho',[0.01, 0.02, 0.05, 0.1, 0.2, 0.5]);
+eval = rating_recommend(@dmf, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', outputs{1}{4}, 'alpha', 0, 'beta',0, 'init',true);
+
+
+eval  = rating_recommend(@ctr, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho, 'Y', item_feat, 'beta', 1);
+eval_1 = rating_recommend(@dmf, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho, 'alpha', 0, 'beta',0, 'init',true);
+eval_2  = rating_recommend(@ctr, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho);
+eval_3  = rating_recommend(@ctr, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho, 'Y', item_feat, 'beta', 10);
+eval_4  = rating_recommend(@ctr, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho, 'Y', item_feat, 'beta', 0.1);
+eval_5 = rating_recommend(@dmf_aux_reg, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho,...
+    'Y', item_feat, 'beta', 10,'init',true, 'reg', true);
+eval_6 = rating_recommend(@dmf_aux_reg, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho,...
+    'Y', item_feat, 'beta', 5,'init',true, 'reg', true);
+eval_7 = rating_recommend(@dmf_aux_reg, data, 'test_ratio', 0.2, 'K', 64, 'max_iter', 20, 'rho', para.rho,...
+    'Y', item_feat, 'beta', 1,'init',true, 'reg', true);
 
 
 %[B,D] = dmf_aux_reg(data, 'K', 64, 'Y', item_feat, 'max_iter', 20, 'rho', para.rho, 'beta', 0.1);
 load ~/data/citeulike/citeulike.mat
+item_feat = tfidf(item_feat);
+
 k=64;
 [U,S,V] = svds(item_feat, k);
 Y = U * S.^(0.5);

@@ -17,7 +17,7 @@ function [eval_summary, eval_detail, elapsed] = heldout_rec(rec_hash, rec_real, 
         [~, tests{t}] = split_matrix(mat, split_mode, 1-test_ratio);
     end
 
-    parfor t=1:times
+    for t=1:times
         test = tests{t}; train = sparse(mat - test);
         fprintf('%d,%d\n',full(sum(train(:))),full(sum(test(:))));
         tic; [B, D] = rec_hash(train);

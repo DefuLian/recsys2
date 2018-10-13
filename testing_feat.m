@@ -1,4 +1,4 @@
-parpool('local', 7);
+parpool('local', 5);
 addpath(genpath('~/code/recsys'))
 addpath(genpath('~/code/recsys2'))
 
@@ -8,8 +8,11 @@ clear('result');
 para = paras{1}; para = cell2struct(para(2:2:end), para(1:2:end),1);
 load ~/data/yelp/yelp/map/yelpdata.mat
 item_feat = tfidf(item_feat);
-%load ~/data/yelp/yelp/map/word.embed.mat;
-%item_feat = item_feat * embedding;
+%load ~/data/yelp/yelp/map/word_clean.embed.mat;
+%item_feat = item_feat * double(embedding);
+%item_feat = NormalizeFea(item_feat);
+%size(item_feat)
+%norm(item_feat(1,:))
 metric_fun = @(metric) metric.item_ndcg_score(1,end);
 
 filename = '~/data/testing_feat_large_results.mat';
@@ -21,7 +24,6 @@ k = 64;
 alg{1} = @(mat) dmf(mat, 'K', k, 'max_iter', 20, 'rho', para.rho, 'alpha',0, 'beta', 0);
 alg{2} = @(mat) dmf_aux_(mat, 'K', k, 'max_iter', 20, 'rho', para.rho, 'Y', item_feat);
 alg{3} = @(mat) dmf_aux_c(mat, 'K', k, 'rho', para.rho, 'Y', item_feat);
-
 
 if ~exist('outputs1','var')
     alg1 = @(mat,varargin) dmf_aux_reg(mat, 'reg', false, 'K', k, 'Y', item_feat, 'max_iter', 20, 'rho', para.rho, 'init', true, varargin{:});
@@ -41,15 +43,18 @@ if ~exist('outputs3','var')
 end
 alg{5} = @(mat) dmf_aux_reg(mat, 'reg', true, 'K', k, 'Y', item_feat, 'max_iter', 20, 'rho', para.rho, 'beta_init', outputs3{1}{2}, 'beta_bin', outputs4{1}{2});
 
+alg{6} = @(mat) dmf_aux_(mat, 'K', k, 'max_iter', 20, 'rho', para.rho, 'Y', item_feat, 'update', false);
+alg{7} = @(mat) dmf(mat, 'K', k, 'max_iter', 20, 'rho', para.rho, 'alpha',0, 'beta', 0);
 
 if ~exist('results', 'var')
     results = cell(length(alg),1);
 end
 
 for i=1:length(alg)
-    if isempty(results{i})
+    if i>length(results) || isempty(results{i})
+        fprintf('%d\n',i);
         [outputs_t{1:3}] = rating_recommend(alg{i}, data, 'test_ratio', 0.2, 'times', 5);
         results{i} = outputs_t;
+        save(filename, 'results','-append');
     end
-    save(filename, 'results','-append');
 end
